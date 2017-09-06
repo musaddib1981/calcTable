@@ -6,6 +6,7 @@
 #include <QString>
 #include <QDebug>
 #include "tablemodel2.h"
+#include "orders.h"
 
 struct DataLevels
 {
@@ -13,14 +14,6 @@ struct DataLevels
     int type;
     int num;
 };
-
-enum
-{
-    e_null,
-    e_buy,
-    e_sell
-};
-
 
 class CLevels
 {

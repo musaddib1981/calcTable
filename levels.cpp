@@ -53,23 +53,13 @@ DataLevels CLevels::operator [](int n)
 }
 
 
-bool lessThanSell(const DataLevels &data1, const DataLevels &data2)
+bool inline lessThanSell(const DataLevels &data1, const DataLevels &data2)
 {
-    int idata1 = data1.price * 10000 + 0.5;
-    int idata2 = data1.price * 10000 + 0.5;
-
-
-
     return (data1.price > data2.price);
 }
 
-bool lessThanBuy(const DataLevels &data1, const DataLevels &data2)
+bool inline lessThanBuy(const DataLevels &data1, const DataLevels &data2)
 {
-    int idata1 = data1.price * 10000 + 0.5;
-    int idata2 = data1.price * 10000 + 0.5;
-
-
-
     return (data1.price < data2.price);
 }
 
@@ -98,7 +88,7 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
     else
        qStableSort(data.begin(), data.end(), lessThanBuy);
 
-    int i,n,delta,j,k = 0;
+    int i, n, delta, j, k = 0;
     for (i = 0; i < data.size(); i++)
     {
        if (data[i].type == e_buy)
@@ -115,14 +105,17 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
     {
        n = num;
        i = 0;
-       while (i < data.size() && data[i].num == type && data[i].num >= n)
+       while (i < data.size() && data[i].type == type && data[i].num >= n)
           i++;
        do
        {
            if (i == 0)
                delta = num - data[i].num;
            else
-               delta = getDeltaOrders(i-1, i);
+           if (data[i - 1].num >= num && data[i - 1].type == type) // важные изменения
+               delta = num - data[i].num;                          // 4.09.2017
+           else
+               delta = getDeltaOrders(i - 1, i);
            do
            {
                if (type == e_buy)
@@ -177,7 +170,7 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
         i = 0;
         do
         {
-            if ((i + 1) > data.size()-1)
+            if ((i + 1) > data.size() - 1)
                 break;
 
             if (data[i + 1].type != e_sell)
@@ -215,7 +208,7 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
         i = 0;
         do
         {
-            if ((i + 1) > data.size()-1)
+            if ((i + 1) > data.size() - 1)
                 break;
 
             if (data[i + 1].type != e_buy)
@@ -227,7 +220,7 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
             data[i].num = data[i].num - data[i + 1].num;
             i++;
         }while(1);
-     }
+    }
 
     for (i = 0; i < data.size(); i++)
     {
@@ -237,8 +230,8 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
           for (j = 0; j < data[i].num; j++)
           {
               tableModel2->appendRow();
-              tableModel2->setData(0,k,"buy limit");
-              tableModel2->setData(2,k,data[i].price);
+              tableModel2->setData(0, k, "buy limit");
+              tableModel2->setData(2, k, data[i].price);
               k++;
           }
        }
@@ -249,8 +242,8 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
           for (j = 0; j < data[i].num; j++)
           {
               tableModel2->appendRow();
-              tableModel2->setData(0,k,"sell limit");
-              tableModel2->setData(2,k,data[i].price);
+              tableModel2->setData(0, k, "sell limit");
+              tableModel2->setData(2, k, data[i].price);
               k++;
           }
 
@@ -258,3 +251,4 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
     }
 
 }
+

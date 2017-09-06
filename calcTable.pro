@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     comboboxdelegate.cpp \
     tabledata.cpp \
     levels.cpp \
-    tablemodel2.cpp
+    tablemodel2.cpp \
+    orders.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel1.h \
@@ -27,6 +28,7 @@ HEADERS  += mainwindow.h \
     comboboxdelegate.h \
     tabledata.h \
     levels.h \
-    tablemodel2.h
+    tablemodel2.h \
+    orders.h
 
 QMAKE_CXXFLAGS += -std=c++11

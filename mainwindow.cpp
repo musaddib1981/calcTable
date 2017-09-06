@@ -229,17 +229,22 @@ void MainWindow::slotButtonCalc(void)
     qDebug()<<"Рабочий объем: "<<current_volume;
 
     int op, n;
-    int op1, n1;
 
     //смотрим превышение объема, какие текущие ордера открыты
-    op = getBuySell(tableModel1->getTableData(), current_volume, n);
+    /*op = getBuySell(tableModel1->getTableData(), current_volume, n);
     if (op == e_buy)
         for (i = 0; i < n; i++)
             qDebug()<<"buy";
     else
     if (op == e_sell)
         for (i = 0; i < n; i++)
-            qDebug()<<"sell";
+            qDebug()<<"sell";*/
+
+    COrders orders = COrders(tableModel1->getTableData(), current_volume);
+    orders.print();
+    op = orders.getType();
+    n = orders.getNum();
+
 
     CTableData tableData = tableModel1->getTableData();
     CLevels levels;
@@ -248,26 +253,14 @@ void MainWindow::slotButtonCalc(void)
     for (i = 0; i < levels.size(); i++)
     {
 
-        //tableData.clear();
         tableData = tableModel1->getTableData();
-        //qDebug()<<tableData.rowCount();
+        //эмулируем уровень какие ордера откроются или закроются на этом уровне
         emulate(tableData, levels[i].price);
-        op1 = getBuySell(tableData, current_volume, n1);
-        //for (j = 0; j < tableData.rowCount(); j++)
-        //  qDebug()<<tableData.getData(0,j)<<tableData.getData(1,j)<<tableData.getData(2,j);
-
-        levels.setNum(i, n1);
-        levels.setType(i, op1);
-
-        //if (op1 == e_buy)
-        //   qDebug()<<levels[i].price<<"buy"<<n1;
-        //else
-        //if (op1 == e_sell)
-        //   qDebug()<<levels[i].price<<"sell"<<n1;
-        //else
-         //  qDebug()<<levels[i].price;
-
-
+        //смотрим превышение объема ордеров на данном уровне
+        COrders orders2 = COrders(tableData, current_volume);
+        //сопоставляем уровню превышение объема ордеров
+        levels.setNum(i, orders2.getNum());
+        levels.setType(i, orders2.getType());
     }
 
     tableModel2->clear();
