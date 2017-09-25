@@ -5,46 +5,13 @@ CLevels::CLevels(void)
 
 }
 
-bool CLevels::searchDuplicate(float lev)
+void CLevels::addLevel(int type, int num, float price)
 {
-    QString level = QString::number(lev,'f',4);
-    int i;
-    for (i = 0; i < data.size(); i++)
-       if (QString::number(data[i].price,'f',4) == level)
-           return true;
-    return false;
-}
-
-void CLevels::create(const CTableData &table)
-{
-    int i;
-    QString orderType;
-    float price;
-    float tp;
     DataLevels item;
-
-    for (i = 0; i < table.rowCount(); i++)
-    {
-        orderType = table.getData(0,i).toString();
-        price = table.getData(2,i).toFloat();
-        tp = table.getData(3,i).toFloat();
-        if ((orderType == "buy" || orderType == "sell") && tp > 0.0001 && searchDuplicate(tp) == false)
-        {
-            item.price = tp;
-            item.type = 0;
-            item.num = 0;
-            data.push_back(item);
-        }
-        else
-        if ((orderType == "buy stop" || orderType == "sell stop" || orderType == "buy limit" || orderType == "sell limit") && searchDuplicate(price) == false)
-        {
-            item.price = price;
-            item.type = 0;
-            item.num = 0;
-            data.push_back(item);
-
-        }
-    }
+    item.type = type;
+    item.num = num;
+    item.price = price;
+    data.push_back(item);
 }
 
 DataLevels CLevels::operator [](int n)
@@ -81,14 +48,68 @@ int CLevels::getDeltaOrders(int index1, int index2)
 
 }
 
-void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
+int invertOrderType(int type)
 {
+    if (type == e_buy)
+        return e_sell;
+    else
+    if (type == e_sell)
+        return e_buy;
+
+    return type;
+}
+
+//расчет лимитов
+void CLevels::calcLimits(int op)
+{
+    int i;
+    int op2 = invertOrderType(op);
+    //цикл по buy
+    i = data.size() - 1;
+    do
+    {
+        if ((i - 1) < 0)
+            break;
+
+        if (data[i - 1].type != op)
+            break;
+
+        if (data[i].num <= 0 || data[i - 1].num <= 0)
+            break;
+
+        data[i].num = data[i].num - data[i - 1].num;
+        i--;
+
+    }while(1);
+
+    //цикл по sell
+    i = 0;
+    do
+    {
+        if ((i + 1) > data.size() - 1)
+            break;
+
+        if (data[i + 1].type != op2)
+            break;
+
+        if (data[i].num <= 0 || data[i + 1].num <= 0)
+            break;
+
+        data[i].num = data[i].num - data[i + 1].num;
+        i++;
+    }while(1);
+}
+
+QVector<CResOrders> CLevels::getResult(int type, int num)
+{
+    QVector <CResOrders> vec;
+
     if (type == e_sell || type == e_null)
        qStableSort(data.begin(), data.end(), lessThanSell);
     else
        qStableSort(data.begin(), data.end(), lessThanBuy);
 
-    int i, n, delta, j, k = 0;
+    int i, n, delta;
     for (i = 0; i < data.size(); i++)
     {
        if (data[i].type == e_buy)
@@ -119,23 +140,19 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
            do
            {
                if (type == e_buy)
+               {
                   qDebug()<<"buy"<<data[i].price;
+                  vec.push_back(CResOrders("buy", 1, data[i].price));
+               }
                else
                if (type == e_sell)
+               {
                   qDebug()<<"sell"<<data[i].price;
+                  vec.push_back(CResOrders("sell", 1, data[i].price));
+               }
 
-               tableModel2->appendRow();
-
-               if (type == e_buy)
-                  tableModel2->setData(0, k, "buy");
-               else
-               if (type == e_sell)
-                  tableModel2->setData(0, k, "sell");
-
-               tableModel2->setData(3, k, data[i].price);
                delta--;
                n--;
-               k++;
            }while (delta > 0 && n > 0);
            i++;
         }while(n > 0);
@@ -144,111 +161,30 @@ void CLevels::sort(int type, int num, CTableModel2 *tableModel2)
         for (i = 0; i < data.size(); i++)
            if (data[i].type == type)
               data[i].num = data[i].num - num;
+
+        for (i = 1; i < data.size(); i++)
+           if (data[i].type != type && data[i-1].type == data[i].type)
+              data[i].num = data[i].num - data[i - 1].num;
     }
 
-    if (type == e_sell || type == e_null)
-    {
-        //цикл по buy
-        i = data.size() - 1;
-        do
-        {
-            if ((i - 1) < 0)
-                break;
-
-            if (data[i - 1].type != e_buy)
-                break;
-
-            if (data[i].num <= 0 || data[i - 1].num <= 0)
-                break;
-
-            data[i].num = data[i].num - data[i - 1].num;
-            i--;
-
-        }while(1);
-
-        //цикл по sell
-        i = 0;
-        do
-        {
-            if ((i + 1) > data.size() - 1)
-                break;
-
-            if (data[i + 1].type != e_sell)
-                break;
-
-            if (data[i].num <= 0 || data[i + 1].num <= 0)
-                break;
-
-            data[i].num = data[i].num - data[i + 1].num;
-            i++;
-        }while(1);
-    }
-
-    if (type == e_buy)
-    {
-        //цикл по buy
-        i = data.size() - 1;
-        do
-        {
-            if ((i - 1) < 0)
-                break;
-
-            if (data[i - 1].type != e_sell)
-                break;
-
-            if (data[i].num <= 0 || data[i - 1].num <= 0)
-                break;
-
-            data[i].num = data[i].num - data[i - 1].num;
-            i--;
-
-        }while(1);
-
-        //цикл по sell
-        i = 0;
-        do
-        {
-            if ((i + 1) > data.size() - 1)
-                break;
-
-            if (data[i + 1].type != e_buy)
-                break;
-
-            if (data[i].num <= 0 || data[i + 1].num <= 0)
-                break;
-
-            data[i].num = data[i].num - data[i + 1].num;
-            i++;
-        }while(1);
-    }
+    calcLimits(type);
 
     for (i = 0; i < data.size(); i++)
     {
        if (data[i].type == e_buy && data[i].num > 0)
        {
           qDebug()<<data[i].price<<"buy limit"<<data[i].num;
-          for (j = 0; j < data[i].num; j++)
-          {
-              tableModel2->appendRow();
-              tableModel2->setData(0, k, "buy limit");
-              tableModel2->setData(2, k, data[i].price);
-              k++;
-          }
+          vec.push_back(CResOrders("buy limit", data[i].num, data[i].price));
        }
        else
        if (data[i].type == e_sell && data[i].num > 0)
        {
           qDebug()<<data[i].price<<"sell limit"<<data[i].num;
-          for (j = 0; j < data[i].num; j++)
-          {
-              tableModel2->appendRow();
-              tableModel2->setData(0, k, "sell limit");
-              tableModel2->setData(2, k, data[i].price);
-              k++;
-          }
-
+          vec.push_back(CResOrders("sell limit", data[i].num, data[i].price));
        }
     }
+
+    return vec;
 
 }
 

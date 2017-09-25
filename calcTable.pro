@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     tabledata.cpp \
     levels.cpp \
     tablemodel2.cpp \
-    orders.cpp
+    orders.cpp \
+    resorders.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel1.h \
@@ -29,6 +30,7 @@ HEADERS  += mainwindow.h \
     tabledata.h \
     levels.h \
     tablemodel2.h \
-    orders.h
+    orders.h \
+    resorders.h
 
 QMAKE_CXXFLAGS += -std=c++11

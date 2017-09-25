@@ -5,12 +5,12 @@ CTableModel1::CTableModel1(void)
     tableData.insertRowUp(0);
 }
 
-int CTableModel1::rowCount(const QModelIndex &parent) const
+int CTableModel1::rowCount(const QModelIndex &) const
 {
     return tableData.rowCount();
 }
 
-int CTableModel1::columnCount(const QModelIndex &parent) const
+int CTableModel1::columnCount(const QModelIndex &) const
 {
     return tableData.columnCount();
 }

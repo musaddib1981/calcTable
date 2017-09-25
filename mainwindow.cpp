@@ -137,6 +137,43 @@ void MainWindow::slotButtonLoad(void)
 }
 
 
+bool searchDuplicate(float lev, const QVector<float> &vec)
+{
+    QString level = QString::number(lev,'f',4);
+    int i;
+    for (i = 0; i < vec.size(); i++)
+       if (QString::number(vec[i],'f',4) == level)
+           return true;
+    return false;
+}
+
+QVector<float> createPriceLevels(const CTableData &table)
+{
+    int i;
+    QString orderType;
+    float price;
+    float tp;
+    QVector<float> vec;
+
+    for (i = 0; i < table.rowCount(); i++)
+    {
+        orderType = table.getData(0,i).toString();
+        price = table.getData(2,i).toFloat();
+        tp = table.getData(3,i).toFloat();
+        if ((orderType == "buy" || orderType == "sell") && tp > 0.0001 && searchDuplicate(tp, vec) == false)
+            vec.push_back(tp);
+        else
+        if ((orderType == "buy stop" || orderType == "sell stop" || orderType == "buy limit" || orderType == "sell limit") && searchDuplicate(price, vec) == false)
+            vec.push_back(price);
+
+    }
+
+    return vec;
+}
+
+
+
+
 //Функция возвращает каких ордеров больше и на какой объем
 //Возвращаемое значение тип ордера, buy, sell или none, если объемы ордеров buy и sell равны
 //n - на сколько штук относительно рабочего объема идет превышение
@@ -213,7 +250,7 @@ void MainWindow::emulate(CTableData &tableData, float lev)
 void MainWindow::slotButtonCalc(void)
 {
     float current_volume = -1;
-    int i;
+    int i,j,k;
 
     //Находим минимальный объем - это будет рабочим объемом
     for (i = 0; i < tableModel1->rowCount(); i++)
@@ -230,16 +267,6 @@ void MainWindow::slotButtonCalc(void)
 
     int op, n;
 
-    //смотрим превышение объема, какие текущие ордера открыты
-    /*op = getBuySell(tableModel1->getTableData(), current_volume, n);
-    if (op == e_buy)
-        for (i = 0; i < n; i++)
-            qDebug()<<"buy";
-    else
-    if (op == e_sell)
-        for (i = 0; i < n; i++)
-            qDebug()<<"sell";*/
-
     COrders orders = COrders(tableModel1->getTableData(), current_volume);
     orders.print();
     op = orders.getType();
@@ -248,26 +275,37 @@ void MainWindow::slotButtonCalc(void)
 
     CTableData tableData = tableModel1->getTableData();
     CLevels levels;
-    levels.create(tableData);
 
-    for (i = 0; i < levels.size(); i++)
+    QVector<float> priceLevels = createPriceLevels(tableData);
+
+    for (i = 0; i < priceLevels.size(); i++)
     {
 
         tableData = tableModel1->getTableData();
         //эмулируем уровень какие ордера откроются или закроются на этом уровне
-        emulate(tableData, levels[i].price);
+        emulate(tableData, priceLevels[i]);
         //смотрим превышение объема ордеров на данном уровне
         COrders orders2 = COrders(tableData, current_volume);
         //сопоставляем уровню превышение объема ордеров
-        levels.setNum(i, orders2.getNum());
-        levels.setType(i, orders2.getType());
+        levels.addLevel(orders2.getType(), orders2.getNum(), priceLevels[i]);
     }
 
     tableModel2->clear();
-    levels.sort(op, n, tableModel2);
+    QVector<CResOrders> vec = levels.getResult(op, n);
 
-    for (i = 0; i < tableModel2->rowCount(); i++)
-        tableModel2->setData(1,i,current_volume);
+    for (i = 0, k = 0; i < vec.size(); i++)
+    {
+        for (j = 0; j < vec[i].getNum(); j++, k++)
+        {
+          tableModel2->appendRow();
+          tableModel2->setData(0, k, vec[i].getType());
+          tableModel2->setData(1, k, current_volume);
+          if (vec[i].getType() == "buy" || vec[i].getType() == "sell")
+             tableModel2->setData(3, k, vec[i].getPrice());
+          else
+             tableModel2->setData(2, k, vec[i].getPrice());
+        }
+    }
 
 }
 
