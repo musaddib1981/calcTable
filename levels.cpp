@@ -157,17 +157,30 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
            i++;
         }while(n > 0);
 
-
-        for (i = 0; i < data.size(); i++)
-           if (data[i].type == type)
+        //расчет количества лимитных ордеров сверху
+        for (i = 0; i < data.size() - 1; i++)
+           if (data[i].type == type && data[i + 1].type == data[i].type)
+              data[i].num = data[i].num - data[i + 1].num;
+           else
+           if (data[i].type == type && data[i + 1].type != data[i].type)
               data[i].num = data[i].num - num;
+           else
+              break;
 
-        for (i = 1; i < data.size(); i++)
+        //расчет количества лимитных ордеров снизу
+        /*for (i = 0; i < data.size(); i++)
            if (data[i].type != type && data[i-1].type == data[i].type)
-              data[i].num = data[i].num - data[i - 1].num;
+              data[i].num = data[i].num - data[i - 1].num;*/
+
+        for (i = data.size() - 1; i >= 0; i--)
+           if (data[i].type != type && data[i - 1].type == data[i].type)
+               data[i].num = data[i].num - data[i - 1].num;
+           else
+              break;
+
     }
 
-    calcLimits(type);
+    //calcLimits(type);
 
     for (i = 0; i < data.size(); i++)
     {

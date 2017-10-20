@@ -220,12 +220,12 @@ int MainWindow::getBuySell(const CTableData &tableData, float cur_volume, int &n
 void MainWindow::emulate(CTableData &tableData, float lev)
 {
     int i;
-    unsigned int level = lev * 10000;
+    unsigned int level = (lev + 0.00005) * 10000;
 
     for (i = 0; i < tableData.rowCount(); i++)
     {
-        unsigned int price = tableData.getData(2,i).toFloat()*10000;
-        unsigned int tp = tableData.getData(3,i).toFloat()*10000;
+        unsigned int price = (tableData.getData(2,i).toFloat() + 0.00005) *10000;
+        unsigned int tp = (tableData.getData(3,i).toFloat() + 0.00005)*10000;
         if (tableData.getData(0,i) == "sell stop" && level <= price)
             tableData.setData(0,i,"sell");
         else
