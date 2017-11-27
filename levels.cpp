@@ -158,6 +158,22 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
         }while(n > 0);
 
         //расчет количества лимитных ордеров сверху
+        //если первый уровень не превышает кол-во текущих ордеров то все обнуляем
+        //пример текущее кол-во ордеров - 2
+        //       sell 1.2029 2 -> 0
+        //       sell 1.1829 1 -> 0
+        //       buy  1.0779 2
+        //       buy  1.0528 4
+        if (data[0].num <= num)
+        {
+            for (i = 0; i < data.size()- 1; i++)
+               if (data[i].type == type)
+                   data[i].num = 0;
+               else
+                   break;
+        }
+        else
+        {
         for (i = 0; i < data.size() - 1; i++)
            if (data[i].type == type && data[i + 1].type == data[i].type)
               data[i].num = data[i].num - data[i + 1].num;
@@ -166,7 +182,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
               data[i].num = data[i].num - num;
            else
               break;
-
+        }
         //расчет количества лимитных ордеров снизу
         /*for (i = 0; i < data.size(); i++)
            if (data[i].type != type && data[i-1].type == data[i].type)
