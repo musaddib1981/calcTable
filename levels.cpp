@@ -109,7 +109,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
     else
        qStableSort(data.begin(), data.end(), lessThanBuy);
 
-    int i, n, delta;
+    int i, n, delta, p;
     for (i = 0; i < data.size(); i++)
     {
        if (data[i].type == e_buy)
@@ -128,8 +128,21 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
        i = 0;
        while (i < data.size() && data[i].type == type && data[i].num >= n)
           i++;
+       p = 0;
+
        do
        {
+           //Исправлена такая ситуация:
+           //sell
+           //sell
+           //1.1853 sell 6
+           //1.1839 sell 4
+           //1.0779 buy 1
+           //1.0528 buy 3
+
+           if (p == 0 && data[i].type != type)
+               delta = num;
+           else
            if (i == 0)
                delta = num - data[i].num;
            else
@@ -153,6 +166,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
 
                delta--;
                n--;
+               p++;
            }while (delta > 0 && n > 0);
            i++;
         }while(n > 0);
