@@ -188,8 +188,11 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
         }
         else
         {
-        for (i = 0; i < data.size() - 1; i++)
-           if (data[i].type == type && data[i + 1].type == data[i].type)
+         for (i = 0; i < data.size() - 1; i++)
+           if (data[i].type == type && data[i + 1].type == data[i].type && data[i].num >= num)
+              data[i].num = data[i].num - num;
+           else
+           if (data[i].type == type && data[i + 1].type == data[i].type && data[i].num < num)
               data[i].num = data[i].num - data[i + 1].num;
            else
            if (data[i].type == type && data[i + 1].type != data[i].type)
