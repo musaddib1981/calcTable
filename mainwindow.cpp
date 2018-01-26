@@ -8,7 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
     mainWidget->setLayout(mainLayout);
     this->setCentralWidget(mainWidget);
 
-    setFixedSize(1024,768);
+    //setFixedSize(1024,768);
+    setMinimumSize(640, 480);
 
     label1 = new QLabel("Исходная таблица");
     tableView1 = new QTableView();

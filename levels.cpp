@@ -170,7 +170,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
            }while (delta > 0 && n > 0);
            i++;
         }while(n > 0);
-
+      }
         //расчет количества лимитных ордеров сверху
         //если первый уровень не превышает кол-во текущих ордеров то все обнуляем
         //пример текущее кол-во ордеров - 2
@@ -200,18 +200,12 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
            else
               break;
         }
-        //расчет количества лимитных ордеров снизу
-        /*for (i = 0; i < data.size(); i++)
-           if (data[i].type != type && data[i-1].type == data[i].type)
-              data[i].num = data[i].num - data[i - 1].num;*/
 
         for (i = data.size() - 1; i >= 0; i--)
            if (data[i].type != type && data[i - 1].type == data[i].type)
                data[i].num = data[i].num - data[i - 1].num;
            else
               break;
-
-    }
 
     //calcLimits(type);
 
