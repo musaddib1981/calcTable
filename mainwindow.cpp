@@ -113,6 +113,10 @@ void MainWindow::slotButtonDelete(void)
 
 void MainWindow::slotButtonSave(void)
 {
+     bool res;
+     QMessageBox msgBox;
+
+
      QString filename = QFileDialog::getSaveFileName(
                         this,
                         tr("Сохранить таблицу"),
@@ -121,11 +125,23 @@ void MainWindow::slotButtonSave(void)
 
      if ( filename.isEmpty() )
              return;
-     tableModel1->save(filename );
+     res = tableModel1->save(filename );
+     if (res == false)
+     {
+          msgBox.setStandardButtons(QMessageBox::Ok);
+          msgBox.setText("");
+          msgBox.setIcon(QMessageBox::Critical);
+          msgBox.setInformativeText("Ошибка записи");
+          msgBox.exec();
+     }
 }
 
 void MainWindow::slotButtonLoad(void)
 {
+    bool res;
+    QMessageBox msgBox;
+
+
     QString filename = QFileDialog::getOpenFileName(
                         this,
                         tr("Загрузить таблицу"),
@@ -134,7 +150,20 @@ void MainWindow::slotButtonLoad(void)
 
      if ( filename.isEmpty() )
              return;
-     tableModel1->load(filename);
+    res = tableModel1->load(filename);
+
+    if (res == false)
+    {
+         msgBox.setStandardButtons(QMessageBox::Ok);
+         msgBox.setText("");
+         msgBox.setIcon(QMessageBox::Critical);
+         msgBox.setInformativeText("Ошибка загрузки");
+         msgBox.exec();
+    }
+    else
+    {
+        tableModel2->clear();
+    }
 }
 
 

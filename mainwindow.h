@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QGridLayout>
+#include <QMessageBox>
 #include <QTableView>
 #include <QLabel>
 #include <QAbstractItemModel>

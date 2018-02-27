@@ -31,8 +31,8 @@ public:
     void insertStringUp(int n);
     void insertStringDown(int n);
     void deleteString(int n);
-    void save(QString name);
-    void load(QString name);
+    bool save(QString name);
+    bool load(QString name);
     QVariant getData(int col, int row) { return tableData.getData(col,row); }
     CTableData getTableData(void) { return tableData; }
 signals:

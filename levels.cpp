@@ -118,7 +118,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
        if (data[i].type == e_sell)
           qDebug()<<data[i].price<<"sell"<<data[i].num;
        else
-          qDebug()<<data[i].price;
+          qDebug()<<data[i].price<<"none";
     }
 
     //Определение тейкпрофитов текущих ордеров

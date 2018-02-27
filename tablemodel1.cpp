@@ -134,11 +134,13 @@ void CTableModel1::deleteString(int n)
     endResetModel();
 }
 
-void CTableModel1::save(QString name)
+bool CTableModel1::save(QString name)
 {
     int i;
+    bool res;
     QFile data(name);
-    if (data.open(QFile::WriteOnly | QFile::Truncate) == true)
+    res = data.open(QFile::WriteOnly | QFile::Truncate);
+    if (res == true)
     {
         QTextStream stream(&data);
         for (i = 0; i < tableData.rowCount(); i++)
@@ -153,17 +155,20 @@ void CTableModel1::save(QString name)
         stream.flush();
         data.close();
     }
+    return res;
 }
 
-void CTableModel1::load(QString name)
+bool CTableModel1::load(QString name)
 {
     int i;
     QString str;
     QStringList list;
     std::array<QVariant, 5> arr;
+    bool res;
 
     QFile data(name);
-    if (data.open(QFile::ReadOnly) == true)
+    res = data.open(QFile::ReadOnly);
+    if (res == true)
     {
 
         beginResetModel();
@@ -188,5 +193,6 @@ void CTableModel1::load(QString name)
         endResetModel();
         data.close();
     }
+    return res;
 }
 
