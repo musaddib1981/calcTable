@@ -22,12 +22,46 @@ DataLevels CLevels::operator [](int n)
 
 bool inline lessThanSell(const DataLevels &data1, const DataLevels &data2)
 {
-    return (data1.price > data2.price);
+    //return (data1.price > data2.price);
+
+    if (data1.type == data2.type && data1.price > data2.price)
+        return true;
+
+    if (data1.type == data2.type)
+        return false;
+
+    //Остальное дописать в процессе
 }
 
 bool inline lessThanBuy(const DataLevels &data1, const DataLevels &data2)
 {
-    return (data1.price < data2.price);
+    if (data1.type == data2.type && data1.price > data2.price)
+        return true;
+
+    if (data1.type == data2.type)
+        return false;
+
+    if (data1.type == e_buy && data2.type == e_sell)
+        return true;
+
+    if (data1.type == e_buy && data2.type == e_null)
+        return true;
+
+    if (data1.type == e_sell && data2.type == e_buy)
+        return false;
+
+    if (data1.type == e_sell && data2.type == e_null)
+        return false;
+
+    if (data1.type == e_null && data2.type == e_buy)
+        return false;
+
+    if (data1.type == e_null && data2.type == e_sell)
+        return true;
+
+    return false;
+
+    //return (data1.price > data2.price);
 }
 
 
@@ -178,7 +212,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
         //       sell 1.1829 1 -> 0
         //       buy  1.0779 2
         //       buy  1.0528 4
-        if (data[0].num <= num)
+        /*if (data[0].num <= num)
         {
             for (i = 0; i < data.size()- 1; i++)
                if (data[i].type == type)
@@ -186,9 +220,24 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
                else
                    break;
         }
-        else
+        else*/
         {
-         for (i = 0; i < data.size() - 1; i++)
+           for (i = 0; i < data.size(); i++)
+               if (data[i].type == type)
+                   data[i].num = data[i].num - num;
+               else
+                   break;
+
+           for (i = 0; i < data.size() - 1; i++)
+               if (data[i].type == type && data[i + 1].type == type)
+               {
+                   if (data[i].num > data[i + 1].num)
+                       data[i].num = data[i].num - data[i + 1].num;
+                   else
+                       data[i + 1].num = data[i + 1].num - data[i].num;
+               }
+        }
+         /*for (i = 0; i < data.size() - 1; i++)
            if (data[i].type == type && data[i + 1].type == data[i].type && data[i].num >= num)
               data[i].num = data[i].num - num;
            else
@@ -199,7 +248,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
               data[i].num = data[i].num - num;
            else
               break;
-        }
+        }*/
 
         for (i = data.size() - 1; i >= 0; i--)
            if (data[i].type != type && data[i - 1].type == data[i].type)
