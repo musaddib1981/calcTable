@@ -30,6 +30,25 @@ bool inline lessThanSell(const DataLevels &data1, const DataLevels &data2)
     if (data1.type == data2.type)
         return false;
 
+    if (data1.type == e_sell && data2.type == e_buy)
+        return true;
+
+    if (data1.type == e_sell && data2.type == e_null)
+        return true;
+
+    if (data1.type == e_buy && data2.type == e_sell)
+        return false;
+
+    if (data1.type == e_buy && data2.type == e_null)
+        return false;
+
+    if (data1.type == e_null && data2.type == e_buy)
+        return true;
+
+    if (data1.type == e_null && data2.type == e_sell)
+        return false;
+
+
     //Остальное дописать в процессе
 }
 
@@ -205,58 +224,37 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
            i++;
         }while(n > 0);
       }
-        //расчет количества лимитных ордеров сверху
-        //если первый уровень не превышает кол-во текущих ордеров то все обнуляем
-        //пример текущее кол-во ордеров - 2
-        //       sell 1.2029 2 -> 0
-        //       sell 1.1829 1 -> 0
-        //       buy  1.0779 2
-        //       buy  1.0528 4
-        /*if (data[0].num <= num)
-        {
-            for (i = 0; i < data.size()- 1; i++)
-               if (data[i].type == type)
-                   data[i].num = 0;
-               else
-                   break;
-        }
-        else*/
-        {
-           for (i = 0; i < data.size(); i++)
-               if (data[i].type == type)
-                   data[i].num = data[i].num - num;
-               else
-                   break;
 
-           for (i = 0; i < data.size() - 1; i++)
-               if (data[i].type == type && data[i + 1].type == type)
-               {
-                   if (data[i].num > data[i + 1].num)
-                       data[i].num = data[i].num - data[i + 1].num;
-                   else
-                       data[i + 1].num = data[i + 1].num - data[i].num;
-               }
-        }
-         /*for (i = 0; i < data.size() - 1; i++)
-           if (data[i].type == type && data[i + 1].type == data[i].type && data[i].num >= num)
-              data[i].num = data[i].num - num;
-           else
-           if (data[i].type == type && data[i + 1].type == data[i].type && data[i].num < num)
-              data[i].num = data[i].num - data[i + 1].num;
-           else
-           if (data[i].type == type && data[i + 1].type != data[i].type)
-              data[i].num = data[i].num - num;
-           else
-              break;
-        }*/
+      //расчет количества лимитных ордеров сверху
+      //вычитаем открытые ордера
+      for (i = 0; i < data.size(); i++)
+         if (data[i].type == type)
+            data[i].num = data[i].num - num;
+         else
+            break;
 
-        for (i = data.size() - 1; i >= 0; i--)
-           if (data[i].type != type && data[i - 1].type == data[i].type)
-               data[i].num = data[i].num - data[i - 1].num;
-           else
-              break;
+      //определяем кол-во лимитов
+      for (i = 0; i < data.size() - 1; i++)
+         if (data[i].type == type && data[i + 1].type == type)
+         {
+             if (data[i].num < 0 || data[i + 1].num < 0)
+                 break;
 
-    //calcLimits(type);
+             if (data[i].num > data[i + 1].num)
+                 data[i].num = data[i].num - data[i + 1].num;
+             else
+                 data[i + 1].num = data[i + 1].num - data[i].num;
+         }
+         else
+             break;
+
+
+     //расчет лимитных ордеров снизу
+     for (i = data.size() - 1; i >= 0; i--)
+        if (data[i].type != type && data[i - 1].type == data[i].type)
+            data[i].num = data[i].num - data[i - 1].num;
+        else
+           break;
 
     for (i = 0; i < data.size(); i++)
     {
