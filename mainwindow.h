@@ -33,7 +33,9 @@ class MainWindow : public QMainWindow
     QTableView *tableView2;
     CTableModel1 *tableModel1;
     CTableModel2 *tableModel2;
-    QPushButton *buttonAddUp, *buttonAddDown, *buttonDelete, *buttonSave, *buttonLoad, *buttonCalc, *buttonClear;
+    QPushButton *buttonAddUp, *buttonAddDown, *buttonDelete, *buttonSave, *buttonLoad, *buttonCalc, *buttonClear, *buttonSaveAs;
+    QString fname;
+    QLabel openedFile;
 
     int getBuySell(const CTableData &tableData, float cur_volume, int &n);
     void emulate(CTableData &tableData, float lev);
@@ -47,6 +49,7 @@ public slots:
     void slotButtonAddDown(void);
     void slotButtonDelete(void);
     void slotButtonSave(void);
+    void slotButtonSaveAs(void);
     void slotButtonLoad(void);
     void slotButtonCalc(void);
     void slotButtonClear(void);

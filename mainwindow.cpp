@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     buttonAddDown = new QPushButton("Добавить ниже");
     buttonDelete = new QPushButton("Удалить");
     buttonSave = new QPushButton("Сохранить");
+    buttonSaveAs = new QPushButton("Сохранить как...");
     buttonLoad = new QPushButton("Загрузить");
     buttonClear = new QPushButton("Очистить строку");
     buttonCalc = new QPushButton("Рассчитать");
@@ -35,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     buttonAddDown->setFixedSize(150,30);
     buttonDelete->setFixedSize(150,30);
     buttonSave->setFixedSize(150,30);
+    buttonSaveAs->setFixedSize(150,30);
     buttonLoad->setFixedSize(150,30);
     buttonClear->setFixedSize(150,30);
     buttonCalc->setFixedSize(150,30);
@@ -43,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(buttonAddDown, SIGNAL(clicked(bool)), this, SLOT(slotButtonAddDown()));
     connect(buttonDelete, SIGNAL(clicked(bool)), this, SLOT(slotButtonDelete()));
     connect(buttonSave, SIGNAL(clicked(bool)), this, SLOT(slotButtonSave()));
+    connect(buttonSaveAs, SIGNAL(clicked(bool)), this, SLOT(slotButtonSaveAs()));
     connect(buttonLoad, SIGNAL(clicked(bool)), this, SLOT(slotButtonLoad()));
     connect(buttonClear, SIGNAL(clicked(bool)), this, SLOT(slotButtonClear()));
     connect(buttonCalc, SIGNAL(clicked(bool)), this, SLOT(slotButtonCalc()));
@@ -55,9 +58,10 @@ MainWindow::MainWindow(QWidget *parent)
     mainLayout->addWidget(buttonAddDown,4,1);
     mainLayout->addWidget(buttonDelete,4,2);
     mainLayout->addWidget(buttonSave,4,3);
-    mainLayout->addWidget(buttonLoad,5,0);
-    mainLayout->addWidget(buttonClear,5,1);
-    mainLayout->addWidget(buttonCalc,5,2);
+    mainLayout->addWidget(buttonSaveAs,5,0);
+    mainLayout->addWidget(buttonLoad,5,1);
+    mainLayout->addWidget(buttonClear,5,2);
+    mainLayout->addWidget(buttonCalc,5,3);
 
     CDoubleSpinBoxDelegate *doubleSpinBox1 = new CDoubleSpinBoxDelegate(0, 1000, 2, 0.01);
     CDoubleSpinBoxDelegate *doubleSpinBox2 = new CDoubleSpinBoxDelegate(0, 10000, 4, 0.0001);
@@ -115,17 +119,25 @@ void MainWindow::slotButtonSave(void)
 {
      bool res;
      QMessageBox msgBox;
+     QString filename;
 
 
-     QString filename = QFileDialog::getSaveFileName(
+     if (fname.isEmpty())
+     {
+        filename = QFileDialog::getSaveFileName(
                         this,
                         tr("Сохранить таблицу"),
                         QDir::currentPath(),
                         tr("Файл таблицы (*.tfx)"));
 
-     if ( filename.isEmpty() )
-             return;
-     res = tableModel1->save(filename );
+        if ( filename.isEmpty() )
+              return;
+
+        fname = filename;
+        setWindowTitle("calcTable - " + fname);
+     }
+
+     res = tableModel1->save(fname );
      if (res == false)
      {
           msgBox.setStandardButtons(QMessageBox::Ok);
@@ -136,21 +148,53 @@ void MainWindow::slotButtonSave(void)
      }
 }
 
+void MainWindow::slotButtonSaveAs(void)
+{
+    bool res;
+    QMessageBox msgBox;
+
+
+    QString filename = QFileDialog::getSaveFileName(
+                       this,
+                       tr("Сохранить таблицу"),
+                       QDir::currentPath(),
+                       tr("Файл таблицы (*.tfx)"));
+
+    if ( filename.isEmpty() )
+            return;
+
+    fname = filename;
+    setWindowTitle("calcTable - " + fname);
+
+    res = tableModel1->save(filename );
+    if (res == false)
+    {
+         msgBox.setStandardButtons(QMessageBox::Ok);
+         msgBox.setText("");
+         msgBox.setIcon(QMessageBox::Critical);
+         msgBox.setInformativeText("Ошибка записи");
+         msgBox.exec();
+    }
+}
+
 void MainWindow::slotButtonLoad(void)
 {
     bool res;
     QMessageBox msgBox;
 
 
-    QString filename = QFileDialog::getOpenFileName(
+    fname = QFileDialog::getOpenFileName(
                         this,
                         tr("Загрузить таблицу"),
                         QDir::currentPath(),
                         tr("Файл таблицы (*.tfx)") );
 
-     if ( filename.isEmpty() )
+     if ( fname.isEmpty() )
              return;
-    res = tableModel1->load(filename);
+
+    setWindowTitle("calcTable - " + fname);
+
+    res = tableModel1->load(fname);
 
     if (res == false)
     {
@@ -226,7 +270,7 @@ int MainWindow::getBuySell(const CTableData &tableData, float cur_volume, int &n
 
     }
 
-   // qDebug()<<buy_volume<<sell_volume;
+
     count_buy = buy_volume / cur_volume + 0.5;
     count_sell = sell_volume / cur_volume + 0.5;
 

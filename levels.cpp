@@ -250,7 +250,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
 
 
      //расчет лимитных ордеров снизу
-     for (i = data.size() - 1; i >= 0; i--)
+     for (i = data.size() - 1; i > 0; i--)
         if (data[i].type != type && data[i - 1].type == data[i].type)
             data[i].num = data[i].num - data[i - 1].num;
         else

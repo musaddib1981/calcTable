@@ -67,7 +67,7 @@ bool CTableModel1::setData(const QModelIndex &index, const QVariant &value, int 
     return false;
 }
 
-Qt::ItemFlags CTableModel1::flags(const QModelIndex &index) const
+Qt::ItemFlags CTableModel1::flags(const QModelIndex &) const
 {
     return (Qt::ItemIsEditable | Qt::ItemIsEnabled);
 }
@@ -146,9 +146,7 @@ bool CTableModel1::save(QString name)
         for (i = 0; i < tableData.rowCount(); i++)
         {
              stream<<tableData.getData(0, i).toString()<<";";
-             //stream.setRealNumberPrecision(2);
              stream<<QString::number(tableData.getData(1, i).toFloat(),'f',2)<<";";
-             //stream.setRealNumberPrecision(4);
              stream<<QString::number(tableData.getData(2, i).toFloat(),'f',4)<<";"<<QString::number(tableData.getData(3, i).toFloat(),'f',4)<<";"<<tableData.getData(4, i).toString()<<";\n";
 
         }
@@ -160,7 +158,6 @@ bool CTableModel1::save(QString name)
 
 bool CTableModel1::load(QString name)
 {
-    int i;
     QString str;
     QStringList list;
     std::array<QVariant, 5> arr;
