@@ -112,6 +112,20 @@ int invertOrderType(int type)
     return type;
 }
 
+//Проверка присутсвуют ли отложенные ордера сверху
+bool CLevels::isExistsUpperLimits(void)
+{
+    int i;
+    bool res = false;
+
+    if (data.isEmpty())
+            return false;
+    for (i = 1; i <data.size(); i++)
+       if (data[i].type != data[0].type)
+            return true;
+    return false;
+}
+
 //расчет лимитов
 void CLevels::calcLimits(int op)
 {
@@ -235,7 +249,7 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
 
       //определяем кол-во лимитов
       for (i = 0; i < data.size() - 1; i++)
-         if (data[i].type == type && data[i + 1].type == type)
+         if (data[i].type == data[0].type && data[i + 1].type == data[0].type)
          {
              if (data[i].num < 0 || data[i + 1].num < 0)
                  break;
@@ -250,9 +264,10 @@ QVector<CResOrders> CLevels::getResult(int type, int num)
 
 
      //расчет лимитных ордеров снизу
-     for (i = data.size() - 1; i > 0; i--)
-        if (data[i].type != type && data[i - 1].type == data[i].type)
-            data[i].num = data[i].num - data[i - 1].num;
+     if (isExistsUpperLimits())
+       for (i = data.size() - 1; i > 0; i--)
+          if (data[i].type != data[data.size() - 1].type && data[i - 1].type == data[data.size() - 1].type)
+              data[i].num = data[i].num - data[i - 1].num;
         else
            break;
 

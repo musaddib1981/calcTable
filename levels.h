@@ -30,6 +30,7 @@ public:
     QVector<CResOrders> getResult(int type, int num);
 
     void addLevel(int type, int num, float price);
+    bool isExistsUpperLimits(void);
 };
 
 #endif // CLEVELS_H
